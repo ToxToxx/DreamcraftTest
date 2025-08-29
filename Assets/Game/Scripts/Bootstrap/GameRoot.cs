@@ -44,7 +44,7 @@ namespace Game.Gameplay.Bootstrap
 
         void Awake()
         {
-            _di = new SimpleContainer();
+            _di = new Container();
             ServiceLocator.Set(_di);
 
             if (_groundPrefab) Instantiate(_groundPrefab);
@@ -66,12 +66,12 @@ namespace Game.Gameplay.Bootstrap
 
             var sessionGo = new GameObject("[GameSession]");
             var session = sessionGo.AddComponent<GameSession>();
-            (_di as SimpleContainer)!.Inject(session);
+            (_di as Container)!.Inject(session);
             _di.BindInstance(session);
 
 
             var player = Instantiate(_playerPrefab);
-            (_di as SimpleContainer)!.InjectGameObject(player.gameObject);
+            (_di as Container)!.InjectGameObject(player.gameObject);
 
 
             var weapons = player.GetComponent<WeaponController>();
@@ -83,7 +83,7 @@ namespace Game.Gameplay.Bootstrap
 
             var spawnerGo = new GameObject("[EnemySpawner]");
             var spawner = spawnerGo.AddComponent<EnemySpawner>();
-            (_di as SimpleContainer)!.Inject(spawner);
+            (_di as Container)!.Inject(spawner);
             spawner.Begin(player.transform);
         }
     }
