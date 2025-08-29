@@ -150,3 +150,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _rb: {fileID: 1547387299637801690}
+  _col: {fileID: 5683111740791177397}
+  _hitMask:
+    serializedVersion: 2
+    m_Bits: 256
