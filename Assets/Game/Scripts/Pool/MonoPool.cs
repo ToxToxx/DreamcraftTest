@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Game.Core.Di;
-
 
 namespace Game.Core.Pool
 {
@@ -12,7 +12,6 @@ namespace Game.Core.Pool
         private readonly Transform _root;
         private readonly IServiceResolver _di;
 
-
         public MonoPool(T prefab, Transform root, IServiceResolver di, int preload = 0)
         {
             _prefab = prefab;
@@ -22,15 +21,13 @@ namespace Game.Core.Pool
                 Despawn(SpawnInternal());
         }
 
-
         private T SpawnInternal()
         {
-            var inst = Object.Instantiate(_prefab, _root);
+            var inst = UnityEngine.Object.Instantiate(_prefab, _root);
             (_di as Container)?.InjectGameObject(inst.gameObject);
             inst.gameObject.SetActive(false);
             return inst;
         }
-
 
         public T Spawn()
         {
@@ -40,21 +37,20 @@ namespace Game.Core.Pool
             return obj;
         }
 
-        public T Spawn(System.Action<T> setup)
+        public T Spawn(Action<T> setup)
         {
             var obj = _stack.Count > 0 ? _stack.Pop() : SpawnInternal();
-            setup?.Invoke(obj);                     
-            obj.gameObject.SetActive(true);         
+            setup?.Invoke(obj);
+            obj.gameObject.SetActive(true);
             obj.OnSpawned();
             return obj;
         }
 
-
         public void Despawn(T obj)
         {
+            obj.transform.SetParent(_root);
             obj.OnDespawned();
             obj.gameObject.SetActive(false);
-            obj.transform.SetParent(_root);
             _stack.Push(obj);
         }
     }

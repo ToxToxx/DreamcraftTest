@@ -1,7 +1,6 @@
 using UnityEngine;
 using Game.Core.Pool;
 
-
 namespace Game.Gameplay.Enemies
 {
     [RequireComponent(typeof(Rigidbody))]
@@ -12,12 +11,10 @@ namespace Game.Gameplay.Enemies
         [SerializeField] protected float _speed = 4f;
         [SerializeField] protected int _touchDamage = 1;
 
-
         protected int _hp;
         protected Transform _target;
         protected Rigidbody _rb;
         protected System.Action<EnemyBase> _onDie;
-
 
         protected virtual void Awake()
         {
@@ -25,9 +22,7 @@ namespace Game.Gameplay.Enemies
             _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         }
 
-
         public void Init(Transform target) { _target = target; _hp = _maxHp; }
-
 
         protected virtual void Update()
         {
@@ -38,16 +33,11 @@ namespace Game.Gameplay.Enemies
             if (dir.sqrMagnitude > 0.0001f) transform.forward = dir;
         }
 
-
         void OnTriggerEnter(Collider other)
         {
             if (other.TryGetComponent<Game.Gameplay.Player.PlayerHealth>(out var ph))
-            {
                 ph.TakeDamage(_touchDamage);
-                _onDie?.Invoke(this); 
-            }
         }
-
 
         public void TakeDamage(int dmg)
         {
@@ -55,11 +45,20 @@ namespace Game.Gameplay.Enemies
             if (_hp <= 0) _onDie?.Invoke(this);
         }
 
-
         public void SetOnDie(System.Action<EnemyBase> cb) => _onDie = cb;
 
+        public virtual void OnSpawned()
+        {
+            _hp = _maxHp;
+            if (_rb) { _rb.linearVelocity = Vector3.zero; _rb.angularVelocity = Vector3.zero; }
+        }
 
-        public virtual void OnSpawned() { _hp = _maxHp; }
-        public virtual void OnDespawned() { if (_rb) _rb.linearVelocity = Vector3.zero; _target = null; }
+        public virtual void OnDespawned()
+        {
+            if (_rb) { _rb.linearVelocity = Vector3.zero; _rb.angularVelocity = Vector3.zero; }
+            _target = null;
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
+        }
     }
 }

@@ -2,29 +2,27 @@ using UnityEngine;
 using Game.Core.Di;
 using Game.Core.Pool;
 
-
 namespace Game.Gameplay.Enemies
 {
     [AddComponentMenu("Game/Enemies/Spawner 3D")]
     public sealed class EnemySpawner : MonoBehaviour
     {
         [SerializeField] private float _interval = 1.0f;
-        [SerializeField] private float _minRadius = 22f;
-        [SerializeField] private float _maxRadius = 30f;
         [SerializeField, Range(0f, 1f)] private float _slowChance = 0.35f;
-        [SerializeField] private float _y = 0f; 
+        [SerializeField] private float _offscreenMargin = 0.08f;
+        [SerializeField] private LayerMask _groundMask = ~0;
+        [SerializeField] private float _rayMax = 500f;
+        [SerializeField] private float _minDistanceFromPlayer = 12f;
+        [SerializeField] private float _spawnY = 0f;
 
-
+        [Inject] private Camera _cam;
         [Inject] private MonoPool<FastChaser> _fastPool;
         [Inject] private MonoPool<SlowTank> _slowPool;
-
 
         private Transform _target;
         private float _t;
 
-
         public void Begin(Transform target) { _target = target; }
-
 
         void Update()
         {
@@ -33,38 +31,44 @@ namespace Game.Gameplay.Enemies
             if (_t < _interval) return;
             _t = 0f;
 
-
-            bool slow = Random.value < _slowChance;
-            if (slow)
+            if (Random.value < _slowChance)
             {
-                var e = _slowPool.Spawn();
-                SpawnEnemy(e);
-                e.SetOnDie(x => _slowPool.Despawn((SlowTank)x));
+                _slowPool.Spawn(e => {
+                    var p = NextOffscreenPoint(); p.y = _spawnY;
+                    e.transform.position = p;
+                    e.Init(_target);
+                    e.SetOnDie(x => _slowPool.Despawn((SlowTank)x));
+                });
             }
             else
             {
-                var e = _fastPool.Spawn();
-                SpawnEnemy(e);
-                e.SetOnDie(x => _fastPool.Despawn((FastChaser)x));
+                _fastPool.Spawn(e => {
+                    var p = NextOffscreenPoint(); p.y = _spawnY;
+                    e.transform.position = p;
+                    e.Init(_target);
+                    e.SetOnDie(x => _fastPool.Despawn((FastChaser)x));
+                });
             }
         }
 
-
-        private void SpawnEnemy(EnemyBase e)
+        private Vector3 NextOffscreenPoint()
         {
-            var pos = RandomPointOnRing();
-            e.transform.position = pos;
-            e.Init(_target);
-        }
+            for (int i = 0; i < 6; i++)
+            {
+                float vx, vy;
+                if (Random.value < 0.5f) { vx = Random.value < 0.5f ? -_offscreenMargin : 1f + _offscreenMargin; vy = Random.Range(0f, 1f); }
+                else { vy = Random.value < 0.5f ? -_offscreenMargin : 1f + _offscreenMargin; vx = Random.Range(0f, 1f); }
 
-
-        private Vector3 RandomPointOnRing()
-        {
-            float r = Random.Range(_minRadius, _maxRadius);
-            float a = Random.Range(0f, Mathf.PI * 2f);
-            var offset = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * r;
-            var p = _target.position + offset; p.y = _y;
-            return p;
+                var ray = _cam.ViewportPointToRay(new Vector3(vx, vy, 0f));
+                if (Physics.Raycast(ray, out var hit, _rayMax, _groundMask, QueryTriggerInteraction.Ignore))
+                {
+                    var p = hit.point;
+                    if ((p - _target.position).sqrMagnitude >= _minDistanceFromPlayer * _minDistanceFromPlayer)
+                        return p;
+                }
+            }
+            var f = _cam.transform.forward; f.y = 0f; f.Normalize();
+            return _target.position + f * (_minDistanceFromPlayer + 5f);
         }
     }
 }
