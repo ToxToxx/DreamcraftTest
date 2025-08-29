@@ -40,6 +40,15 @@ namespace Game.Core.Pool
             return obj;
         }
 
+        public T Spawn(System.Action<T> setup)
+        {
+            var obj = _stack.Count > 0 ? _stack.Pop() : SpawnInternal();
+            setup?.Invoke(obj);                     
+            obj.gameObject.SetActive(true);         
+            obj.OnSpawned();
+            return obj;
+        }
+
 
         public void Despawn(T obj)
         {
