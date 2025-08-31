@@ -56,14 +56,23 @@ namespace Game.Gameplay.Enemies
             for (int i = 0; i < 6; i++)
             {
                 float vx, vy;
-                if (Random.value < 0.5f) { vx = Random.value < 0.5f ? -_offscreenMargin : 1f + _offscreenMargin; vy = Random.Range(0f, 1f); }
-                else { vy = Random.value < 0.5f ? -_offscreenMargin : 1f + _offscreenMargin; vx = Random.Range(0f, 1f); }
+                if (Random.value < 0.5f) 
+                { vx = Random.value < 0.5f 
+                        ? -_offscreenMargin 
+                        : 1f + _offscreenMargin;
+                    vy = Random.Range(0f, 1f); }
+                else 
+                { vy = Random.value < 0.5f 
+                        ? -_offscreenMargin 
+                        : 1f + _offscreenMargin; 
+                    vx = Random.Range(0f, 1f); }
 
                 var ray = _cam.ViewportPointToRay(new Vector3(vx, vy, 0f));
                 if (Physics.Raycast(ray, out var hit, _rayMax, _groundMask, QueryTriggerInteraction.Ignore))
                 {
                     var p = hit.point;
-                    if ((p - _target.position).sqrMagnitude >= _minDistanceFromPlayer * _minDistanceFromPlayer)
+                    if ((p - _target.position).sqrMagnitude 
+                        >= _minDistanceFromPlayer * _minDistanceFromPlayer)
                         return p;
                 }
             }

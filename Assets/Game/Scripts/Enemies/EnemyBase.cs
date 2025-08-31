@@ -1,5 +1,6 @@
 using UnityEngine;
 using Game.Core.Pool;
+using Game.Gameplay.Player;
 
 namespace Game.Gameplay.Enemies
 {
@@ -35,7 +36,7 @@ namespace Game.Gameplay.Enemies
 
         void OnTriggerEnter(Collider other)
         {
-            if (other.TryGetComponent<Game.Gameplay.Player.PlayerHealth>(out var ph))
+            if (other.TryGetComponent<PlayerHealth>(out var ph))
                 ph.TakeDamage(_touchDamage);
         }
 

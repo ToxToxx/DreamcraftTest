@@ -4,6 +4,8 @@ using Game.Core.Pool;
 using Game.Gameplay.Enemies;
 using Game.Gameplay.Player;
 using Game.Gameplay.Session;
+using Game.Gameplay.Weapons;
+using Game.Configs;
 
 
 namespace Game.Gameplay.Bootstrap
@@ -17,12 +19,12 @@ namespace Game.Gameplay.Bootstrap
 
 
         [Header("Weapons")]
-        [SerializeField] private Game.Configs.WeaponConfig _singleShot;
-        [SerializeField] private Game.Configs.WeaponConfig _spreadShot;
+        [SerializeField] private WeaponConfig _singleShot;
+        [SerializeField] private WeaponConfig _spreadShot;
 
 
         [Header("Bullet")]
-        [SerializeField] private Game.Gameplay.Weapons.Bullet _bulletPrefab;
+        [SerializeField] private Bullet _bulletPrefab;
 
 
         [Header("Enemies")]
@@ -37,7 +39,7 @@ namespace Game.Gameplay.Bootstrap
         private IServiceResolver _di;
 
 
-        private MonoPool<Game.Gameplay.Weapons.Bullet> _bulletPool;
+        private MonoPool<Bullet> _bulletPool;
         private MonoPool<FastChaser> _fastPool;
         private MonoPool<SlowTank> _slowPool;
 
@@ -53,7 +55,7 @@ namespace Game.Gameplay.Bootstrap
             var poolsRoot = new GameObject("[Pools]").transform;
 
 
-            _bulletPool = new MonoPool<Game.Gameplay.Weapons.Bullet>(_bulletPrefab, poolsRoot, _di, preload: 64);
+            _bulletPool = new MonoPool<Bullet>(_bulletPrefab, poolsRoot, _di, preload: 64);
             _fastPool = new MonoPool<FastChaser>(_fastPrefab, poolsRoot, _di, preload: 10);
             _slowPool = new MonoPool<SlowTank>(_slowPrefab, poolsRoot, _di, preload: 6);
 
